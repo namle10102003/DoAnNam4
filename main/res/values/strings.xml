@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="loginTxt">Are you have an account? <font color="#FD511E">Sign in</font></string>
+    <string-array name="time_ranges">
+        <item>1 Week</item>
+        <item>1 Month</item>
+        <item>1 Year</item>
+    </string-array>
+    <string-array name="body_measures">
+        <item>Height</item>
+        <item>Weight</item>
+        <item>BMI</item>
+    </string-array>
 </resources>
