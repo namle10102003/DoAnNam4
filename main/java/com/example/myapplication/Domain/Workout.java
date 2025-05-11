@@ -2,69 +2,75 @@ package com.example.myapplication.Domain;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Workout implements Serializable {
-    private String title;
-    private String description;
-    private String picPath;
-    private int kcal;
-    private String durationAll;
-    private ArrayList<Lesson> Lesson;
+    private int planId;
+    private int sessionId;
+    private int exerciseId;
+    private Date date;
+    private Exercise exercise;
+    private ArrayList<Set> sets;
 
-    public Workout(String title, String description, String picPath, int kcal, String durationAll, ArrayList<com.example.myapplication.Domain.Lesson> lesson) {
-        this.title = title;
-        this.description = description;
-        this.picPath = picPath;
-        this.kcal = kcal;
-        this.durationAll = durationAll;
-        Lesson = lesson;
+    public Workout(int planId, int sessionId, int exerciseId, Date date, Exercise exercise, ArrayList<com.example.myapplication.Domain.Set> sets) {
+        this.planId = planId;
+        this.sessionId = sessionId;
+        this.exerciseId = exerciseId;
+        this.date = date;
+        this.exercise = exercise;
+        this.sets = sets;
     }
 
-    public String getTitle() {
-        return title;
+    public int getPlanId() {
+        return planId;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setPlanId(int planId) {
+        this.planId = planId;
     }
 
-    public String getDescription() {
-        return description;
+    public int getSessionId() {
+        return sessionId;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public String getPicPath() {
-        return picPath;
+    public int getExerciseId() {
+        return exerciseId;
     }
 
-    public void setPicPath(String picPath) {
-        this.picPath = picPath;
+    public void setExerciseId(int exerciseId) {
+        this.exerciseId = exerciseId;
     }
 
-    public int getKcal() {
-        return kcal;
+    public  Date getDate() {
+        return date;
     }
 
-    public void setKcal(int kcal) {
-        this.kcal = kcal;
+    public void  setDate(Date date) {
+        this.date = date;
     }
 
-    public String getDurationAll() {
-        return durationAll;
+    public Exercise getExercise() {
+        return exercise;
     }
 
-    public void setDurationAll(String durationAll) {
-        this.durationAll = durationAll;
+    public void setExercise(Exercise exercise) {
+        this.exercise = exercise;
     }
 
-    public ArrayList<Lesson> getLesson() {
-        return Lesson;
+    public ArrayList<Set> getSets() {
+        return sets;
     }
 
-    public void setLesson(ArrayList<Lesson> lesson) {
-        Lesson = lesson;
+    public void setSets(ArrayList<Set> sets) {
+        this.sets = sets;
     }
+
+    public int getNumberOfSet() {
+        return  this.sets.size();
+    }
+
 }
