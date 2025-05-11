@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/mainColor"
-    tools:context=".Activity.WorkoutActivity">
+    tools:context=".Activity.ExerciseActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -19,14 +19,13 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
                 <ImageView
                     android:id="@+id/pic"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="375dp"
                     android:scaleType="centerCrop"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:srcCompat="@tools:sample/backgrounds/scenic" />
@@ -42,33 +41,43 @@
                     app:srcCompat="@drawable/back" />
 
                 <View
-                    android:id="@+id/view2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="127dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/pic"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:background="@drawable/gradient_bg"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/gradient_bg"
+                    app:layout_constraintBottom_toBottomOf="@+id/pic"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:id="@+id/textView14"
+                android:id="@+id/levelTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Intermediate"
+                android:text="Beginner"
                 android:textColor="@color/orange"
                 android:textStyle="bold"
-                android:layout_marginStart="16dp"/>
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"/>
 
             <TextView
                 android:id="@+id/titleTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="title"
+                android:text="Exercise Name"
                 android:textStyle="bold"
                 android:textColor="@color/white"
-                android:textSize="23sp"
+                android:textSize="24sp"
                 android:layout_marginStart="16dp"/>
+
+            <LinearLayout
+                android:id="@+id/targetMuscleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp">
+                <!-- Target muscles will be added here dynamically -->
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/watchTutorialLayout"
@@ -96,31 +105,31 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
+
+
             <TextView
                 android:id="@+id/descriptionTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:textColor="@color/white"
-                android:text="description" />
-
-            <TextView
-                android:id="@+id/textView19"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sets"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:layout_marginStart="16dp"
-                android:textStyle="bold"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:id="@+id/view3"
-                android:layout_marginTop="8dp"
-                android:layout_height="match_parent"
-                android:paddingBottom="100dp"/>
+                android:text="Exercise description goes here." />
         </LinearLayout>
     </ScrollView>
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/startBtn"
+        android:layout_width="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/orange_bg"
+        android:textColor="@color/white"
+        android:layout_height="50dp"
+        android:text="Add to Plan"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

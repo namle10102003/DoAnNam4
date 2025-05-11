@@ -24,6 +24,9 @@
             android:name=".Activity.ChartActivity"
             android:exported="false" />
         <activity
+            android:name=".Activity.ExerciseActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activity.IntroActivity"
             android:exported="true">
             <intent-filter>

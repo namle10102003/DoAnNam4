@@ -1,20 +1,18 @@
 package com.example.myapplication.Activity;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
-import com.example.myapplication.Adapter.LessonsAdapter;
+import com.example.myapplication.Adapter.SetAdapter;
+import com.example.myapplication.Domain.Exercise;
 import com.example.myapplication.Domain.Workout;
-import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityWorkoutBinding;
 
 public class WorkoutActivity extends AppCompatActivity {
@@ -38,7 +36,9 @@ private Workout workout;
     }
 
     private void setVariable() {
-        int resId=getResources().getIdentifier(workout.getPicPath(),"drawable",getPackageName());
+        Exercise itemExercise = workout.getExercise();
+
+        int resId=getResources().getIdentifier(itemExercise.getImageUrl(),"drawable",getPackageName());
         Glide.with(this)
                 .load(resId)
                 .into(binding.pic);
@@ -50,13 +50,16 @@ private Workout workout;
             }
         });
 
-        binding.titleTxt.setText(workout.getTitle());
-        binding.exerciseTxt.setText(workout.getLesson().size()+" Exercise");
-        binding.kcalTxt.setText(workout.getKcal()+" Kcal");
-        binding.durationTxt.setText(workout.getDurationAll());
-        binding.descriptionTxt.setText(workout.getDescription());
+        binding.titleTxt.setText(itemExercise.getName());
+        binding.descriptionTxt.setText(itemExercise.getDescription());
+
+        binding.watchTutorialLayout.setOnClickListener(v -> {
+            String videoUrl = itemExercise.getVideoUrl();
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
+            startActivity(intent);
+        });
 
         binding.view3.setLayoutManager(new LinearLayoutManager(WorkoutActivity.this,LinearLayoutManager.VERTICAL,false));
-        binding.view3.setAdapter(new LessonsAdapter(workout.getLesson()));
+        binding.view3.setAdapter(new SetAdapter(workout.getSets()));
     }
 }

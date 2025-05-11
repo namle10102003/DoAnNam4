@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication.Activity.WorkoutActivity;
+import com.example.myapplication.Domain.Exercise;
 import com.example.myapplication.Domain.Workout;
 import com.example.myapplication.databinding.ViewholderWorkoutBinding;
 
@@ -34,16 +35,16 @@ public class WorkoutAdapter extends RecyclerView.Adapter<WorkoutAdapter.Viewhold
 
     @Override
     public void onBindViewHolder(@NonNull WorkoutAdapter.Viewholder holder, int position) {
-        holder.binding.titleTxt.setText(list.get(position).getTitle());
-        int resId=context.getResources().getIdentifier(list.get(position).getPicPath(),"drawable",context.getPackageName());
+        Exercise itemExercise = list.get(position).getExercise();
+
+        holder.binding.titleTxt.setText(itemExercise.getName());
+        int resId=context.getResources().getIdentifier(itemExercise.getImageUrl(),"drawable",context.getPackageName());
 
         Glide.with(holder.itemView.getContext())
                 .load(resId)
                 .into(holder.binding.pic);
 
-        holder.binding.exerciseTxt.setText(list.get(position).getLesson().size()+" Exercise");
-        holder.binding.kcalTxt.setText(list.get(position).getKcal()+" Kcal");
-        holder.binding.durationTxt.setText(list.get(position).getDurationAll());
+        holder.binding.setTxt.setText(list.get(position).getNumberOfSet() + " sets");
 
         holder.binding.getRoot().setOnClickListener(v -> {
             Intent intent=new Intent(context, WorkoutActivity.class);
