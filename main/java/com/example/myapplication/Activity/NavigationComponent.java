@@ -2,6 +2,7 @@ package com.example.myapplication.Activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,5 +31,18 @@ public class NavigationComponent extends LinearLayout {
         navHome.setOnClickListener(v -> {
             context.startActivity(new Intent(context, MainActivity.class));
         });
+
+        navProfile.setOnClickListener(v -> {
+            // Lấy user_id từ SharedPreferences
+            SharedPreferences prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            String userId = prefs.getString("user_id", null);  // Lấy user_id từ SharedPreferences
+
+            // Truyền user_id cho ProfileActivity
+            Intent intent = new Intent(context, ProfileActivity.class);
+            intent.putExtra("user_id", userId);  // Truyền user_id vào ProfileActivity
+            context.startActivity(intent);
+        });
+
+
     }
 }
