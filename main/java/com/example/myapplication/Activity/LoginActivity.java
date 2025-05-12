@@ -1,6 +1,7 @@
 package com.example.myapplication.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -36,6 +37,14 @@ public class LoginActivity extends AppCompatActivity {
         put("tien", "Tien9999");
     }};
 
+    private final HashMap<String, String> userIdMap = new HashMap<String, String>() {{
+        put("nam", "1");
+        put("long", "2");
+        put("dat", "3");
+        put("sy", "4");
+        put("tien", "5");
+    }};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +74,16 @@ public class LoginActivity extends AppCompatActivity {
             } else if (!mockUsers.containsKey(username) || !mockUsers.get(username).equals(password)) {
                 showError("Incorrect username or password");
             } else {
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                String userId = userIdMap.get(username);
+                SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("username", username);
+                editor.putString("user_id", userId);
+                editor.apply();
+
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra("user_id", userId);
+                startActivity(intent);
                 finish();
             }
         });

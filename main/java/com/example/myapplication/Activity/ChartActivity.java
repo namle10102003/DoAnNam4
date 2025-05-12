@@ -259,5 +259,4 @@ public class ChartActivity extends AppCompatActivity {
                 .show();
     }
 
-
 }
