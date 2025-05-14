@@ -98,9 +98,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Create Workouts
         ArrayList<Workout> workoutList = new ArrayList<>();
-        workoutList.add(new Workout(1, 101, 1, new Date(), listExercise.get(0), sets1));
-        workoutList.add(new Workout(1, 102, 2, new Date(), listExercise.get(1), sets2));
-        workoutList.add(new Workout(1, 103, 3, new Date(), listExercise.get(2), sets3));
+        workoutList.add(new Workout(1, 101, 1, "Lost weight", new Date(), listExercise.get(0), sets1));
+        workoutList.add(new Workout(1, 102, 2, "Lost weight", new Date(), listExercise.get(1), sets2));
+        workoutList.add(new Workout(1, 103, 3, "Lost weight", new Date(), listExercise.get(2), sets3));
 
         return workoutList;
     }

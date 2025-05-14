@@ -8,14 +8,16 @@ public class Workout implements Serializable {
     private int planId;
     private int sessionId;
     private int exerciseId;
+    private String planName;
     private Date date;
     private Exercise exercise;
     private ArrayList<Set> sets;
 
-    public Workout(int planId, int sessionId, int exerciseId, Date date, Exercise exercise, ArrayList<com.example.myapplication.Domain.Set> sets) {
+    public Workout(int planId, int sessionId, int exerciseId, String planName, Date date, Exercise exercise, ArrayList<com.example.myapplication.Domain.Set> sets) {
         this.planId = planId;
         this.sessionId = sessionId;
         this.exerciseId = exerciseId;
+        this.planName = planName;
         this.date = date;
         this.exercise = exercise;
         this.sets = sets;
@@ -45,11 +47,19 @@ public class Workout implements Serializable {
         this.exerciseId = exerciseId;
     }
 
-    public  Date getDate() {
+    public String getPlanName() {
+        return planName;
+    }
+
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
+
+    public Date getDate() {
         return date;
     }
 
-    public void  setDate(Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

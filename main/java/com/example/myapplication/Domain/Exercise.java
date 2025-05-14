@@ -1,5 +1,7 @@
 package com.example.myapplication.Domain;
 
+import androidx.annotation.NonNull;
+
 import com.example.myapplication.Enum.MuscleEnum;
 
 import java.io.Serializable;
@@ -89,5 +91,11 @@ public class Exercise implements Serializable {
 
     public void setTargetMuscle3(MuscleEnum targetMuscle3) {
         this.targetMuscle3 = targetMuscle3;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return this.name;
     }
 }

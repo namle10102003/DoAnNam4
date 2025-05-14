@@ -3,11 +3,8 @@ package com.example.myapplication.Adapter;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,7 +51,7 @@ public class BodyTrackAdapter extends RecyclerView.Adapter<BodyTrackAdapter.View
         holder.binding.btnMore.setOnClickListener(view -> {
             PopupMenu popup = new PopupMenu(context, holder.binding.btnMore);
             MenuInflater inflater = popup.getMenuInflater();
-            inflater.inflate(R.menu.body_track_item_menu, popup.getMenu()); // you'll need to define this menu
+            inflater.inflate(R.menu.item_menu, popup.getMenu()); // you'll need to define this menu
 
             popup.setOnMenuItemClickListener(menuItem -> {
                 if (menuItem.getItemId() == R.id.edit) {
