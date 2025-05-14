@@ -21,7 +21,7 @@ public class NavigationComponent extends LinearLayout {
 
         LinearLayout navChart = findViewById(R.id.navChart);
         LinearLayout navHome = findViewById(R.id.navHome);
-        LinearLayout navFavorite = findViewById(R.id.navFavorite);
+        LinearLayout navSchedule = findViewById(R.id.navSchedule);
         LinearLayout navProfile = findViewById(R.id.navProfile);
 
         navChart.setOnClickListener(v -> {
@@ -30,6 +30,10 @@ public class NavigationComponent extends LinearLayout {
 
         navHome.setOnClickListener(v -> {
             context.startActivity(new Intent(context, MainActivity.class));
+        });
+
+        navSchedule.setOnClickListener(v -> {
+            context.startActivity(new Intent(context, ScheduleActivity.class));
         });
 
         navProfile.setOnClickListener(v -> {
