@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Service.BodyTrackService;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -24,6 +25,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.example.myapplication.Adapter.BodyTrackAdapter;
 import com.example.myapplication.Domain.BodyTrack;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -39,8 +41,10 @@ public class ChartActivity extends AppCompatActivity {
     private Spinner timeRangeSpinner;
     private Spinner bodyMeasureSpinner;
     private RecyclerView bodyTrackRecyclerView;
-    private ArrayList<BodyTrack> bodyTrackList;
+    private List<BodyTrack> bodyTrackList;
     private BodyTrackAdapter bodyTrackAdapter;
+    private BodyTrackService bodyTrackService;
+    private int userId;
 
 
     @Override
@@ -48,12 +52,16 @@ public class ChartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
 
+        bodyTrackList = new ArrayList<>();
+        bodyTrackService = new BodyTrackService();
+        getUserId();
+
         lineChart = findViewById(R.id.lineChart);
         timeRangeSpinner = findViewById(R.id.timeRangeSpinner);
         bodyMeasureSpinner = findViewById(R.id.bodyMeasureSpinner);
 
         bodyTrackRecyclerView = findViewById(R.id.historyRecyclerView);
-        bodyTrackList = generateDummyBodyTracks();
+        fetchBodyTrack();
 
         setupChart();
         loadChartData();
@@ -99,8 +107,7 @@ public class ChartActivity extends AppCompatActivity {
                                 item.Height = Integer.parseInt(heightEditText.getText().toString());
                                 item.Weight = Integer.parseInt(weightEditText.getText().toString());
                                 // Optional: Update date to current date if needed
-                                bodyTrackAdapter.notifyDataSetChanged();
-                                loadChartData();
+                                updateBodyTrack(item);
                             } catch (NumberFormatException e) {
                                 Toast.makeText(ChartActivity.this, "Invalid input", Toast.LENGTH_SHORT).show();
                             }
@@ -115,10 +122,7 @@ public class ChartActivity extends AppCompatActivity {
                         .setTitle("Delete Record")
                         .setMessage("Are you sure you want to delete this record?")
                         .setPositiveButton("Delete", (dialog, which) -> {
-                            bodyTrackList.remove(item);
-                            bodyTrackAdapter.notifyDataSetChanged();
-                            loadChartData();
-                            Toast.makeText(ChartActivity.this, "Record deleted", Toast.LENGTH_SHORT).show();
+                            deleteBodyTrack(item.Id);
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
@@ -210,21 +214,6 @@ public class ChartActivity extends AppCompatActivity {
         return weightKg / (heightM * heightM);
     }
 
-
-    private ArrayList<BodyTrack> generateDummyBodyTracks() {
-        ArrayList<BodyTrack> list = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            BodyTrack track = new BodyTrack();
-            track.Id = i;
-            track.Weight = 60 + i;
-            track.Height = 170 + (i % 3);
-            track.Date = new Date(System.currentTimeMillis() - i * 86400000L); // subtract i days
-            track.UserId = 1;
-            list.add(track);
-        }
-        return list;
-    }
-
     private void showAddRecordDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_bodytrack, null);
 
@@ -244,13 +233,9 @@ public class ChartActivity extends AppCompatActivity {
                         newRecord.Height = height;
                         newRecord.Weight = weight;
                         newRecord.Date = currentDate;
-                        newRecord.UserId = 1; // Replace with actual user ID if needed
+                        newRecord.UserId = userId; // Replace with actual user ID if needed
 
-                        bodyTrackList.add(0, newRecord);
-                        bodyTrackAdapter.notifyItemInserted(0);
-                        bodyTrackRecyclerView.scrollToPosition(0);
-
-                        loadChartData();
+                        createBodyTrack(newRecord);
                     } catch (NumberFormatException e) {
                         Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
                     }
@@ -259,4 +244,74 @@ public class ChartActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void fetchBodyTrack() {
+        bodyTrackService.getTracksByUserId(userId, new BodyTrackService.TrackDataListener() {
+            @Override
+            public void onTracksLoaded(List<BodyTrack> tracks) {
+                bodyTrackList.clear();
+                bodyTrackList.addAll(tracks);
+                bodyTrackAdapter.notifyDataSetChanged();
+                loadChartData();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(ChartActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateBodyTrack(BodyTrack track) {
+        bodyTrackService.updateTrack(track, new BodyTrackService.TrackDataListener() {
+            @Override
+            public void onTracksLoaded(List<BodyTrack> tracks) {
+                fetchBodyTrack();
+                bodyTrackAdapter.notifyDataSetChanged();
+                loadChartData();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(ChartActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void createBodyTrack(BodyTrack track) {
+        bodyTrackService.createTrack(track, new BodyTrackService.TrackDataListener() {
+            @Override
+            public void onTracksLoaded(List<BodyTrack> tracks) {
+                fetchBodyTrack();
+                bodyTrackAdapter.notifyDataSetChanged();
+                loadChartData();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(ChartActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deleteBodyTrack(int id) {
+        bodyTrackService.deleteTrack(id, new BodyTrackService.TrackDataListener() {
+            @Override
+            public void onTracksLoaded(List<BodyTrack> tracks) {
+                fetchBodyTrack();
+                bodyTrackAdapter.notifyDataSetChanged();
+                loadChartData();
+
+                Toast.makeText(ChartActivity.this, "Record deleted", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(ChartActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getUserId() {
+        userId = 1;
+    }
 }
