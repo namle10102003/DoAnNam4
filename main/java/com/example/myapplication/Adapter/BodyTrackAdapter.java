@@ -18,15 +18,16 @@ import com.example.myapplication.databinding.ItemBodyTrackBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class BodyTrackAdapter extends RecyclerView.Adapter<BodyTrackAdapter.ViewHolder> {
 
-    private final ArrayList<BodyTrack> list;
+    private final List<BodyTrack> list;
     private final Context context;
     private final OnItemActionListener actionListener;
 
-    public BodyTrackAdapter(Context context, ArrayList<BodyTrack> list, OnItemActionListener listener) {
+    public BodyTrackAdapter(Context context, List<BodyTrack> list, OnItemActionListener listener) {
         this.context = context;
         this.list = list;
         this.actionListener = listener;
