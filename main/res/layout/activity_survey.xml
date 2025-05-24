@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/surveyLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mainColor">
+
+    <ScrollView
+        android:id="@+id/surveyScrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/coordinatorLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/surveyForm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Training Goal -->
+            <TextView
+                android:id="@+id/goalLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Training Goal"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"/>
+            <Spinner
+                android:id="@+id/goalSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edittext_bg"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Sessions per Week -->
+            <TextView
+                android:id="@+id/sessionsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Days per Week"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"/>
+            <Spinner
+                android:id="@+id/sessionsSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edittext_bg"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Training Level -->
+            <TextView
+                android:id="@+id/levelLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Training Level"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"/>
+            <Spinner
+                android:id="@+id/levelSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edittext_bg"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Injury History -->
+            <TextView
+                android:id="@+id/injuryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Previous Injury?"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="16dp"/>
+            <RadioGroup
+                android:id="@+id/injuryGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+                <RadioButton
+                    android:id="@+id/injuryYes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yes"
+                    android:textColor="@color/white"/>
+                <RadioButton
+                    android:id="@+id/injuryNo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No"
+                    android:textColor="@color/white"/>
+            </RadioGroup>
+
+            <!-- Submit Button -->
+            <Button
+                android:id="@+id/submitSurveyBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit Survey"
+                android:backgroundTint="@color/orange"
+                android:textColor="@color/white"
+                android:layout_marginTop="24dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Navigation -->
+    <com.example.myapplication.Activity.NavigationComponent
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
