@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,16 +21,20 @@ import com.example.myapplication.Domain.Set;
 import com.example.myapplication.Domain.Workout;
 import com.example.myapplication.Enum.MuscleEnum;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.ExerciseService;
 import com.example.myapplication.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     private String username = "";
     ArrayList<Exercise> listExercise;
     ArrayList<Workout> listWorkout;
+    private ExerciseService exerciseService;
+    private ExerciseAdapter exerciseAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +42,18 @@ public class MainActivity extends AppCompatActivity {
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        listExercise = getListExercise();
+        exerciseService = new ExerciseService();
+
+        listExercise = new ArrayList<>();
+
+        fetchListExercise();
         listWorkout = getListWorkout();
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         binding.view1.setLayoutManager(new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false));
-        binding.view1.setAdapter(new ExerciseAdapter(listExercise));
+        exerciseAdapter = new ExerciseAdapter(listExercise);
+        binding.view1.setAdapter(exerciseAdapter);
 
         binding.viewWorkout.setLayoutManager(new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false));
         binding.viewWorkout.setAdapter(new WorkoutAdapter(listWorkout));
@@ -52,6 +62,47 @@ public class MainActivity extends AppCompatActivity {
         username = prefs.getString("full_name", "defaultUsername");
         String userId = prefs.getString("user_id", null); // <-- Lấy user_id từ SharedPreferences
 
+    }
+
+    private void fetchListExercise() {
+        exerciseService.GetAll(new ExerciseService.ListExerciseDataListener() {
+            @Override
+            public void onExerciseLoaded(List<Exercise> exercises) {
+                listExercise.clear();
+                int limit = Math.min(10, exercises.size());
+                listExercise.addAll(exercises.subList(0, limit));
+                exerciseAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private  ArrayList<Workout> getListWorkout() {
+        ArrayList<Exercise> listExercise = getListExercise();
+        // Example Sets
+        ArrayList<Set> sets1 = new ArrayList<>();
+        sets1.add(new Set(1, 101, 1, 0, 15, 60));
+        sets1.add(new Set(2, 101, 1, 0, 12, 60));
+
+        ArrayList<Set> sets2 = new ArrayList<>();
+        sets2.add(new Set(3, 102, 2, 50, 10, 90));
+        sets2.add(new Set(4, 102, 2, 60, 8, 90));
+
+        ArrayList<Set> sets3 = new ArrayList<>();
+        sets3.add(new Set(5, 103, 3, 0, 10, 120));
+        sets3.add(new Set(6, 103, 3, 0, 8, 120));
+
+        // Create Workouts
+        ArrayList<Workout> workoutList = new ArrayList<>();
+        workoutList.add(new Workout(1, 101, 1, new Date(), listExercise.get(0), sets1));
+        workoutList.add(new Workout(1, 102, 2, new Date(), listExercise.get(1), sets2));
+        workoutList.add(new Workout(1, 103, 3, new Date(), listExercise.get(2), sets3));
+
+        return workoutList;
     }
 
     private ArrayList<Exercise> getListExercise() {
@@ -89,28 +140,5 @@ public class MainActivity extends AppCompatActivity {
 
 
         return exerciseList;
-    }
-
-    private  ArrayList<Workout> getListWorkout() {
-        // Example Sets
-        ArrayList<Set> sets1 = new ArrayList<>();
-        sets1.add(new Set(1, 101, 1, 0, 15, 60));
-        sets1.add(new Set(2, 101, 1, 0, 12, 60));
-
-        ArrayList<Set> sets2 = new ArrayList<>();
-        sets2.add(new Set(3, 102, 2, 50, 10, 90));
-        sets2.add(new Set(4, 102, 2, 60, 8, 90));
-
-        ArrayList<Set> sets3 = new ArrayList<>();
-        sets3.add(new Set(5, 103, 3, 0, 10, 120));
-        sets3.add(new Set(6, 103, 3, 0, 8, 120));
-
-        // Create Workouts
-        ArrayList<Workout> workoutList = new ArrayList<>();
-        workoutList.add(new Workout(1, 101, 1, new Date(), listExercise.get(0), sets1));
-        workoutList.add(new Workout(1, 102, 2, new Date(), listExercise.get(1), sets2));
-        workoutList.add(new Workout(1, 103, 3, new Date(), listExercise.get(2), sets3));
-
-        return workoutList;
     }
 }
