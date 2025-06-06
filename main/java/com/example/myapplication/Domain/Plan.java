@@ -2,7 +2,9 @@ package com.example.myapplication.Domain;
 
 import androidx.annotation.NonNull;
 
-public class Plan {
+import java.io.Serializable;
+
+public class Plan implements Serializable {
     private int id;
     private int userId;
     private String name;
