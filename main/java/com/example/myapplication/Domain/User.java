@@ -1,6 +1,10 @@
 package com.example.myapplication.Domain;
 
-public class User {
+import androidx.annotation.NonNull;
+
+import java.io.Serializable;
+
+public class User implements Serializable {
     private String id;
     private String username;
     private String password;
@@ -21,6 +25,8 @@ public class User {
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
     }
+
+    public User() {}
 
     // Getter & Setter cho tất cả các thuộc tính
 
@@ -86,5 +92,18 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "UserId: " + id
+                + "\n Username: " + username
+                + "\n Password: " + password
+                + "\n FullName: " + fullName
+                + "\n Email: " + email
+                + "\n Phone: " + phoneNumber
+                + "\n DateOfBirth: " + dateOfBirth
+                + "\n Gender: " + gender;
     }
 }

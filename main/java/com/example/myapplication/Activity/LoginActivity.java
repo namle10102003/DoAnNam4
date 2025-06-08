@@ -10,6 +10,7 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,10 +19,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.Domain.DTO.LoginResponse;
+import com.example.myapplication.Domain.User;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.UserService;
 import com.example.myapplication.Utils.ValidationUtil;
 
-import java.util.HashMap;
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -29,21 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView errorTextView, registerTextView;
     private Button loginButton;
 
-    private final HashMap<String, String> mockUsers = new HashMap<String, String>() {{
-        put("nam", "Pass1234");
-        put("long", "Secure123");
-        put("dat", "Dat32145");
-        put("sy", "Sy2024ok");
-        put("tien", "Tien9999");
-    }};
-
-    private final HashMap<String, String> userIdMap = new HashMap<String, String>() {{
-        put("nam", "1");
-        put("long", "2");
-        put("dat", "3");
-        put("sy", "4");
-        put("tien", "5");
-    }};
+    private final UserService userService = new UserService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,22 +59,36 @@ public class LoginActivity extends AppCompatActivity {
 
             if (usernameError != null) {
                 showError(usernameError);
-            } else if (passwordError != null) {
+                return;
+            }
+
+            if (passwordError != null) {
                 showError(passwordError);
-            } else if (!mockUsers.containsKey(username) || !mockUsers.get(username).equals(password)) {
-                showError("Incorrect username or password");
-            } else {
-                String userId = userIdMap.get(username);
+                return;
+            }
+
+            login(username, password);
+        });
+    }
+
+    private void login(String username, String password) {
+        userService.login(username, password, new UserService.LoginDataListener() {
+            @Override
+            public void onLoginSuccess(LoginResponse response) {
                 SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("username", username);
-                editor.putString("user_id", userId);
+                editor.putString("user_id", response.getUserId());
+                editor.putString("full_name", response.getFullName());
                 editor.apply();
 
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("user_id", userId);
                 startActivity(intent);
                 finish();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
             }
         });
     }
