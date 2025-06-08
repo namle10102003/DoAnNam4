@@ -2,22 +2,25 @@ package com.example.myapplication.Activity;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.Domain.User;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.UserService;
 
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -30,13 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String currentUserId;
     private User user;
 
-    private final HashMap<String, User> userProfiles = new HashMap<String, User>() {{
-        put("1", new User("1", "nam", "Pass1234", "Nam Nguyen", "nam@gmail.com", "0905000001", "1999-01-01", "Male"));
-        put("2", new User("2", "long", "Secure123", "Long Tran", "long@gmail.com", "0905000002", "1998-02-02", "Male"));
-        put("3", new User("3", "dat", "Dat32145", "Dat Pham", "dat@gmail.com", "0905000003", "2000-03-03", "Male"));
-        put("4", new User("4", "sy", "Sy2024ok", "Sy Le", "sy@gmail.com", "0905000004", "1997-04-04", "Male"));
-        put("5", new User("5", "tien", "Tien9999", "Tien Vo", "tien@gmail.com", "0905000005", "1996-05-05", "Male"));
-    }};
+    private final UserService userService = new UserService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,28 +58,14 @@ public class ProfileActivity extends AppCompatActivity {
         spGender.setAdapter(adapter);
         spGender.setEnabled(false);
 
-        currentUserId = getIntent().getStringExtra("user_id");
-        user = getUserData(currentUserId);
-
-        if (user != null) {
-            tvUsername.setText(user.getUsername());
-            etFullName.setText(user.getFullName());
-            etEmail.setText(user.getEmail());
-            etPhone.setText(user.getPhoneNumber());
-
-            // Chuyển đổi "1999-01-01" sang "01/01/1999"
-            String[] parts = user.getDateOfBirth().split("-");
-            if (parts.length == 3) {
-                String formattedDob = parts[2] + "/" + parts[1] + "/" + parts[0];
-                etDob.setText(formattedDob);
-            }
-
-            spGender.setSelection(user.getGender().equals("Male") ? 0 : 1);
-        }
+        getUserId();
+        fetchUserData();
 
         btnEdit.setOnClickListener(v -> {
+            if (user == null) return;
+
             if (isEditing) {
-                // Khi đang sửa, nhấn Save sẽ lưu dữ liệu và chuyển về chế độ xem
+                // Save
                 String newFullName = etFullName.getText().toString();
                 String newEmail = etEmail.getText().toString();
                 String newPhone = etPhone.getText().toString();
@@ -93,32 +76,30 @@ public class ProfileActivity extends AppCompatActivity {
                     etDob.setError("Invalid date. Please select a valid date.");
                     return;
                 } else {
-                    etDob.setError(null); // Xóa dấu chấm than nếu hợp lệ
+                    etDob.setError(null);
                 }
 
-                // Cập nhật thông tin người dùng
                 user.setFullName(newFullName);
                 user.setEmail(newEmail);
                 user.setPhoneNumber(newPhone);
                 user.setDateOfBirth(newDob);
                 user.setGender(newGender);
 
-                // Đổi nút về Edit Info sau khi lưu
+                updateUser(user);
+
                 btnEdit.setText("Edit Info");
                 isEditing = false;
 
-                // Tắt sửa các trường thông tin
                 etEmail.setEnabled(false);
                 etFullName.setEnabled(false);
                 etPhone.setEnabled(false);
                 etDob.setEnabled(false);
                 spGender.setEnabled(false);
             } else {
-                // Chuyển sang chế độ sửa khi đang ở chế độ xem
+                // Edit
                 btnEdit.setText("Save");
                 isEditing = true;
 
-                // Bật sửa các trường thông tin
                 etEmail.setEnabled(true);
                 etFullName.setEnabled(true);
                 etPhone.setEnabled(true);
@@ -148,8 +129,64 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private User getUserData(String id) {
-        return userProfiles.get(id);
+    private void fetchUserData() {
+        if (currentUserId != null) {
+            userService.getUserById(currentUserId, new UserService.UserDataListener() {
+                @Override
+                public void onUsersLoaded(User users) {
+                    user = users;
+                    displayUserData();
+                }
+
+                @Override
+                public void onError(String message) {
+                    tvUsername.setText("Failed to load user");
+                    Toast.makeText(ProfileActivity.this, "Error loading profile: " + message, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void getUserId() {
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        currentUserId = prefs.getString("user_id", "-1");
+    }
+
+    private void updateUser(User user) {
+        userService.update(user, new UserService.UserDataListener() {
+            @Override
+            public void onUsersLoaded(User users) {
+                SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("full_name", users.getFullName());
+                editor.apply();
+
+                fetchUserData();
+            }
+
+            @Override
+            public void onError(String message) {
+                tvUsername.setText("Failed to load user");
+                Toast.makeText(ProfileActivity.this, "Error loading profile: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void displayUserData() {
+        if (user == null) return;
+
+        tvUsername.setText(user.getUsername());
+        etFullName.setText(user.getFullName());
+        etEmail.setText(user.getEmail());
+        etPhone.setText(user.getPhoneNumber());
+
+        String[] parts = user.getDateOfBirth().split("/");
+        if (parts.length == 3) {
+            String formattedDob = parts[0] + "/" + parts[1] + "/" + parts[2];
+            etDob.setText(formattedDob);
+        }
+
+        spGender.setSelection(user.getGender().equalsIgnoreCase("Male") ? 0 : 1);
     }
 
     private boolean isValidDate(String dateStr) {

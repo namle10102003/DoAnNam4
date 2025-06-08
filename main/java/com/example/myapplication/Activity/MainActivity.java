@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         binding.viewWorkout.setAdapter(new WorkoutAdapter(listWorkout));
 
         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-        username = prefs.getString("username", "defaultUsername");
+        username = prefs.getString("full_name", "defaultUsername");
         String userId = prefs.getString("user_id", null); // <-- Lấy user_id từ SharedPreferences
 
     }

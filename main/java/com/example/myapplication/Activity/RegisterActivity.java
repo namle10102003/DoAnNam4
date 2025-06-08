@@ -13,14 +13,19 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.Domain.User;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.UserService;
 import com.example.myapplication.Utils.ValidationUtil;
+
+import java.util.List;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private EditText usernameEditText, passwordEditText, confirmPasswordEditText;
     private TextView errorTextView, loginRedirectText;
     private Button registerButton;
+    private UserService userService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +37,12 @@ public class RegisterActivity extends AppCompatActivity {
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
         registerButton = findViewById(R.id.registerButton);
         errorTextView = findViewById(R.id.errorTextView);
+        loginRedirectText = findViewById(R.id.loginRedirectText);
+
         errorTextView.setTextColor(Color.RED);
         errorTextView.setVisibility(View.GONE);
-        loginRedirectText = findViewById(R.id.loginRedirectText);
+
+        userService = new UserService();
 
         registerButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
@@ -53,10 +61,7 @@ public class RegisterActivity extends AppCompatActivity {
             } else if (!password.equals(confirmPassword)) {
                 showError("Passwords do not match");
             } else {
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                intent.putExtra("registeredUsername", username);
-                startActivity(intent);
-                finish();
+                registerUser(username, password);
             }
         });
 
@@ -65,6 +70,23 @@ public class RegisterActivity extends AppCompatActivity {
         loginRedirectText.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();
+        });
+    }
+
+    private void registerUser(String username, String password) {
+        User newUser = new User("0", username, password, "New User", "", "", "", "male");
+        userService.create(newUser, new UserService.UserDataListener() {
+            @Override
+            public void onUsersLoaded(User users) {
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
         });
     }
 
