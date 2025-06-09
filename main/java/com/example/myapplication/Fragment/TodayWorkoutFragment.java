@@ -2,6 +2,7 @@ package com.example.myapplication.Fragment;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.myapplication.Activity.AllExerciseActivity;
+import com.example.myapplication.Activity.MainActivity;
 import com.example.myapplication.Adapter.WorkoutAdapter;
 import com.example.myapplication.Adapter.WorkoutScheduleAdapter;
 import com.example.myapplication.Domain.Exercise;
@@ -79,6 +82,16 @@ public class TodayWorkoutFragment extends Fragment {
         });
         binding.todayWorkoutRecyclerView.setAdapter(workoutScheduleAdapter);
 
+        binding.btnAddWorkout.setOnClickListener(v -> {
+            SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", 0);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("selectedDay", null);
+            editor.apply();
+
+            Intent intent = new Intent(requireContext(), AllExerciseActivity.class);
+            startActivity(intent);
+        });
+
         getUserId();
         //fetchListWorkout();
         //fetchListPlan();
@@ -115,7 +128,7 @@ public class TodayWorkoutFragment extends Fragment {
                 }
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
             editDate.setText(sdf.format(workout.getDate()));
         }
 
@@ -127,7 +140,7 @@ public class TodayWorkoutFragment extends Fragment {
             }
             new DatePickerDialog(requireContext(), (view, year, month, dayOfMonth) -> {
                 calendar.set(year, month, dayOfMonth);
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
                 editDate.setText(sdf.format(calendar.getTime()));
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
@@ -140,7 +153,13 @@ public class TodayWorkoutFragment extends Fragment {
                     Plan selectedPlan = (Plan) spinnerPlan.getSelectedItem();
                     Date selectedDate = null;
                     try {
-                        selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(editDate.getText().toString());
+                        SimpleDateFormat displayFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+                        Date displayDate = displayFormat.parse(editDate.getText().toString());
+
+                        SimpleDateFormat storageFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        String storageDateStr = storageFormat.format(displayDate);
+
+                        selectedDate = storageFormat.parse(storageDateStr);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }

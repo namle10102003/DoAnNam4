@@ -23,6 +23,16 @@ public class Workout implements Serializable {
         this.sets = sets;
     }
 
+    public Workout(Workout workout) {
+        this.planId = workout.getPlanId();
+        this.sessionId = workout.getSessionId();
+        this.exerciseId = workout.getExerciseId();
+        this.planName = workout.getPlanName();
+        this.date = workout.getDate();
+        this.exercise = workout.getExercise();
+        this.sets = workout.getSets();
+    }
+
     public int getPlanId() {
         return planId;
     }

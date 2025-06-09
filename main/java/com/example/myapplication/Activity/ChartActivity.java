@@ -105,8 +105,22 @@ public class ChartActivity extends AppCompatActivity {
                         .setView(dialogView)
                         .setPositiveButton("Save", (dialog, which) -> {
                             try {
-                                item.Height = Integer.parseInt(heightEditText.getText().toString());
-                                item.Weight = Integer.parseInt(weightEditText.getText().toString());
+                                String heightStr = heightEditText.getText().toString().trim();
+                                String weightStr = weightEditText.getText().toString().trim();
+
+                                if (heightStr.isEmpty() || weightStr.isEmpty()) {
+                                    Toast.makeText(ChartActivity.this, "Please enter both height and weight", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                try {
+                                    item.Height = Integer.parseInt(heightStr);
+                                    item.Weight = Integer.parseInt(weightStr);
+                                } catch (NumberFormatException e) {
+                                    Toast.makeText(ChartActivity.this, "Height and weight must be valid numbers", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
                                 // Optional: Update date to current date if needed
                                 updateBodyTrack(item);
                             } catch (NumberFormatException e) {
@@ -226,8 +240,24 @@ public class ChartActivity extends AppCompatActivity {
                 .setView(dialogView)
                 .setPositiveButton("Add", (dialog, which) -> {
                     try {
-                        int height = Integer.parseInt(editHeight.getText().toString());
-                        int weight = Integer.parseInt(editWeight.getText().toString());
+                        String heightStr = editHeight.getText().toString().trim();
+                        String weightStr = editWeight.getText().toString().trim();
+
+                        if (heightStr.isEmpty() || weightStr.isEmpty()) {
+                            Toast.makeText(ChartActivity.this, "Please enter both height and weight", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        int height;
+                        int weight;
+                        try {
+                            height = Integer.parseInt(heightStr);
+                            weight = Integer.parseInt(weightStr);
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(ChartActivity.this, "Height and weight must be valid numbers", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         Date currentDate = new Date();
 
                         BodyTrack newRecord = new BodyTrack();

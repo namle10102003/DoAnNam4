@@ -10,9 +10,7 @@ public enum MuscleEnum {
     SHOULDERS("Shoulders"),
     TRICEPS("Triceps"),
     BICEPS("Biceps"),
-    TRAPS("Traps"),
-    FULLBODY("Full Body"),  // Thêm đây
-    CORE("Core");           // Thêm đây
+    TRAPS("Traps");
 
     private final String displayName;
 

@@ -55,31 +55,12 @@
                 android:id="@+id/buttonGoToSurvey"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Go to Survey"
+                android:text="Create a Plan"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:backgroundTint="@color/orange"
                 android:textColor="@color/white"/>
-
-            <EditText
-                android:id="@+id/editTextText"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/edittext_bg"
-                android:drawableEnd="@drawable/search"
-                android:drawablePadding="8dp"
-                android:ems="10"
-                android:hint="Search Exercise..."
-                android:inputType="text"
-                android:padding="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
-                android:textSize="16sp"
-                android:textStyle="italic" />
 
             <LinearLayout
                 android:layout_width="match_parent"

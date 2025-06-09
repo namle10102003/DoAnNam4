@@ -3,6 +3,7 @@ package com.example.myapplication.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -115,8 +116,10 @@ public class ExerciseActivity extends AppCompatActivity {
         }
     }
 
-    private void getUserId() {
-        userId = 1;
+    public void getUserId() {
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
     }
 
     private void fetchListPlan() {
@@ -171,12 +174,14 @@ public class ExerciseActivity extends AppCompatActivity {
             textExercise.setText(selectedExercise.getName());
         }
 
+        editDate.setText(getSelectedDay());
+
         // Date Picker
         editDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             new DatePickerDialog(ExerciseActivity.this, (view, year, month, dayOfMonth) -> {
                 calendar.set(year, month, dayOfMonth);
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
                 editDate.setText(sdf.format(calendar.getTime()));
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
@@ -189,16 +194,33 @@ public class ExerciseActivity extends AppCompatActivity {
                     Plan selectedPlan = (Plan) spinnerPlan.getSelectedItem();
                     Date selectedDate = null;
                     try {
-                        selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(editDate.getText().toString());
+                        SimpleDateFormat displayFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+                        Date displayDate = displayFormat.parse(editDate.getText().toString());
+
+                        SimpleDateFormat storageFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        String storageDateStr = storageFormat.format(displayDate);
+
+                        selectedDate = storageFormat.parse(storageDateStr);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
 
                     // Get values from input fields
-                    int sets = Integer.parseInt(editSets.getText().toString());
-                    int reps = Integer.parseInt(editReps.getText().toString());
-                    int volume = Integer.parseInt(editVolume.getText().toString());
-                    int restTime = Integer.parseInt(editRestTime.getText().toString());
+                    String setsStr = editSets.getText().toString().trim();
+                    String repsStr = editReps.getText().toString().trim();
+                    String volumeStr = editVolume.getText().toString().trim();
+                    String restStr = editRestTime.getText().toString().trim();
+
+                    if (setsStr.isEmpty() || repsStr.isEmpty() || volumeStr.isEmpty() || restStr.isEmpty()) {
+                        Toast.makeText(ExerciseActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    int sets = Integer.parseInt(setsStr);
+                    int reps = Integer.parseInt(repsStr);
+                    int volume = Integer.parseInt(volumeStr);
+                    int restTime = Integer.parseInt(restStr);
+
 
                     if (sets < 0 || reps < 1 || volume < 0 || restTime < 1) {
                         String message = "Invalid input";
@@ -234,6 +256,19 @@ public class ExerciseActivity extends AppCompatActivity {
         }
 
         return result;
+    }
+
+    public String getSelectedDay() {
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String selectedDay = prefs.getString("selectedDay", null);
+
+        if (selectedDay == null) {
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+            return displayFormat.format(new Date());
+        }
+        else {
+            return selectedDay;
+        }
     }
 
 }
