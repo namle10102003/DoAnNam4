@@ -5,4 +5,7 @@
     <color name="mainColor">#101322</color>
     <color name="orange">#fd511e</color>
     <color name="darkBlue">#1c213c</color>
+    <color name="lightGray">#D3D3D3</color>
+    <color name="gray300">#E0E0E0</color>
+    <color name="gray500">#9E9E9E</color>
 </resources>

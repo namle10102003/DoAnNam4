@@ -1,5 +1,6 @@
 package com.example.myapplication.Activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -312,6 +313,8 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     private void getUserId() {
-        userId = 1;
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
     }
 }

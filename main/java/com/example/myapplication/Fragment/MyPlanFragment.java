@@ -1,6 +1,7 @@
 package com.example.myapplication.Fragment;
 
 import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +48,7 @@ public class MyPlanFragment extends Fragment {
         listPlan = new ArrayList<>();
 
         getUserId();
-        fetchListPlan();
+        //fetchListPlan();
 
         binding.myPlanRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
                 LinearLayoutManager.VERTICAL, false));
@@ -66,6 +67,12 @@ public class MyPlanFragment extends Fragment {
         binding.myPlanRecyclerView.setAdapter(planAdapter);
 
         binding.btnAddRecord.setOnClickListener(v -> addPlanListener());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchListPlan();
     }
 
     private void addPlanListener() {
@@ -115,8 +122,10 @@ public class MyPlanFragment extends Fragment {
                 .show();
     }
 
-    private void getUserId() {
-        userId = 1;
+    public void getUserId() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", 0);
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
     }
 
     private void fetchListPlan() {

@@ -36,10 +36,6 @@ public class PlanService {
             @Override
             public void onResponse(Call<List<Plan>> call, Response<List<Plan>> response) {
                 if (response.isSuccessful()) {
-                    String temp = response.body() == null
-                            ? "null"
-                            : "have date";
-                    Log.d("plan", temp);
                     List<Plan> result = response.body() == null
                             ? new ArrayList<>()
                             : response.body();
@@ -63,7 +59,6 @@ public class PlanService {
             @Override
             public void onResponse(Call<Plan> call, Response<Plan> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("plan", "" + response.body().getId());
                     listener.onPlanLoaded(response.body());
                 }
                 else {
@@ -79,7 +74,6 @@ public class PlanService {
     }
 
     public void updatePlan(Plan plan, PlanDataListener listener) {
-        Log.d("plan", "" + plan.getId());
         Call<Plan> call = apiService.update(plan);
         call.enqueue(new Callback<Plan>() {
             @Override

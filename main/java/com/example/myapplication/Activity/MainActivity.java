@@ -22,9 +22,11 @@ import com.example.myapplication.Domain.Workout;
 import com.example.myapplication.Enum.MuscleEnum;
 import com.example.myapplication.R;
 import com.example.myapplication.Service.ExerciseService;
+import com.example.myapplication.Service.WorkoutService;
 import com.example.myapplication.databinding.ActivityMainBinding;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Workout> listWorkout;
     private ExerciseService exerciseService;
     private ExerciseAdapter exerciseAdapter;
+    private WorkoutService workoutService;
+    private WorkoutAdapter workoutAdapter;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +48,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         exerciseService = new ExerciseService();
+        workoutService = new WorkoutService();
 
         listExercise = new ArrayList<>();
-
-        fetchListExercise();
-        listWorkout = getListWorkout();
+        listWorkout = new ArrayList<>();
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
@@ -56,12 +60,29 @@ public class MainActivity extends AppCompatActivity {
         binding.view1.setAdapter(exerciseAdapter);
 
         binding.viewWorkout.setLayoutManager(new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false));
-        binding.viewWorkout.setAdapter(new WorkoutAdapter(listWorkout));
+        workoutAdapter = new WorkoutAdapter(listWorkout);
+        binding.viewWorkout.setAdapter(workoutAdapter);
 
+        binding.seeAllWorkout.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ScheduleActivity.class);
+            startActivity(intent);
+        });
+
+        binding.seeAllExercise.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AllExerciseActivity.class);
+            startActivity(intent);
+        });
+
+        getUserInfo();
+        fetchListExercise();
+        fetchListWorkout();
+    }
+
+    private void getUserInfo() {
         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         username = prefs.getString("full_name", "defaultUsername");
-        String userId = prefs.getString("user_id", null); // <-- Lấy user_id từ SharedPreferences
-
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
     }
 
     private void fetchListExercise() {
@@ -81,64 +102,37 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private  ArrayList<Workout> getListWorkout() {
-        ArrayList<Exercise> listExercise = getListExercise();
-        // Example Sets
-        ArrayList<Set> sets1 = new ArrayList<>();
-        sets1.add(new Set(1, 101, 1, 0, 15, 60));
-        sets1.add(new Set(2, 101, 1, 0, 12, 60));
+    private void fetchListWorkout() {
+        workoutService.getByUserId(userId, new WorkoutService.ListWorkoutDataListener() {
+            @Override
+            public void onWorkoutsLoaded(List<Workout> workouts) {
+                listWorkout.clear();
+                Date today = new Date();
 
-        ArrayList<Set> sets2 = new ArrayList<>();
-        sets2.add(new Set(3, 102, 2, 50, 10, 90));
-        sets2.add(new Set(4, 102, 2, 60, 8, 90));
+                for (Workout workout : workouts) {
+                    if (isSameDay(workout.getDate(), today)) {
+                        listWorkout.add(workout);
+                    }
+                }
 
-        ArrayList<Set> sets3 = new ArrayList<>();
-        sets3.add(new Set(5, 103, 3, 0, 10, 120));
-        sets3.add(new Set(6, 103, 3, 0, 8, 120));
+                workoutAdapter.notifyDataSetChanged();
+            }
 
-        // Create Workouts
-        ArrayList<Workout> workoutList = new ArrayList<>();
-        workoutList.add(new Workout(1, 101, 1, "Lost weight", new Date(), listExercise.get(0), sets1));
-        workoutList.add(new Workout(1, 102, 2, "Lost weight", new Date(), listExercise.get(1), sets2));
-        workoutList.add(new Workout(1, 103, 3, "Lost weight", new Date(), listExercise.get(2), sets3));
-
-        return workoutList;
+            @Override
+            public void onError(String message) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private ArrayList<Exercise> getListExercise() {
-        ArrayList<Exercise> exerciseList = new ArrayList<>();
-
-        exerciseList.add(new Exercise(
-                1,
-                "Seated Dumbbell Shoulder Press",
-                "https://www.youtube.com/watch?v=B-aVuyhvLHU",
-                "A strength exercise that targets the shoulders using dumbbells while seated.",
-                MuscleEnum.SHOULDERS,
-                MuscleEnum.TRICEPS,
-                null
-        ));
-
-        exerciseList.add(new Exercise(
-                2,
-                "Band Chest Fly",
-                "https://www.youtube.com/watch?v=JA8lXeb9yEo",
-                "An isolation chest movement using resistance bands to target the pectoral muscles.",
-                MuscleEnum.CHEST,
-                MuscleEnum.SHOULDERS,
-                null
-        ));
-
-        exerciseList.add(new Exercise(
-                3,
-                "Yoga Warrior I",
-                "https://www.youtube.com/watch?v=Q9vQ3Vxg3IQ",
-                "A foundational yoga pose that strengthens the legs, opens the hips, and improves balance.",
-                MuscleEnum.QUADS,
-                MuscleEnum.GLUTES,
-                MuscleEnum.CALVES
-        ));
-
-
-        return exerciseList;
+    private boolean isSameDay(Date date1, Date date2) {
+        // Implement a method to check if two Date objects represent the same day
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(date1);
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(date2);
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+                calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&
+                calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
     }
 }

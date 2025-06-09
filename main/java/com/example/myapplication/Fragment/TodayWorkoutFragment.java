@@ -2,6 +2,7 @@ package com.example.myapplication.Fragment;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,8 @@ import com.example.myapplication.Domain.Set;
 import com.example.myapplication.Domain.Workout;
 import com.example.myapplication.Enum.MuscleEnum;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.PlanService;
+import com.example.myapplication.Service.WorkoutService;
 import com.example.myapplication.databinding.FragmentTodayWorkoutBinding;
 
 import java.text.ParseException;
@@ -32,13 +35,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class TodayWorkoutFragment extends Fragment {
 
     private FragmentTodayWorkoutBinding binding;
     private ArrayList<Workout> listWorkout;
+    private ArrayList<Plan> listPlan;
     private WorkoutScheduleAdapter workoutScheduleAdapter;
+    private WorkoutService workoutService;
+    private PlanService planService;
+    private int userId;
 
     @Nullable
     @Override
@@ -51,7 +59,10 @@ public class TodayWorkoutFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        listWorkout = getListWorkout();
+        listWorkout = new ArrayList<>();
+        listPlan = new ArrayList<>();
+        workoutService = new WorkoutService();
+        planService = new PlanService();
 
         binding.todayWorkoutRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
@@ -67,11 +78,20 @@ public class TodayWorkoutFragment extends Fragment {
             }
         });
         binding.todayWorkoutRecyclerView.setAdapter(workoutScheduleAdapter);
+
+        getUserId();
+        //fetchListWorkout();
+        //fetchListPlan();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchListPlan();
+        fetchListWorkout();
     }
 
     private void editWorkoutListener(Workout workout) {
-        ArrayList<Plan> listPlan = getListPlan();
-
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_workout, null);
 
         Spinner spinnerPlan = dialogView.findViewById(R.id.spinnerPlan);
@@ -132,7 +152,7 @@ public class TodayWorkoutFragment extends Fragment {
                         workout.setDate(selectedDate); // if needed
                         // Notify adapter if you're updating a list
                         //Reload today workout list
-                        workoutScheduleAdapter.notifyDataSetChanged();
+                        updateWorkout(workout);
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -144,79 +164,93 @@ public class TodayWorkoutFragment extends Fragment {
                 .setTitle("Delete Workout")
                 .setMessage("Are you sure you want to delete this workout?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    listWorkout.remove(item);
-                    workoutScheduleAdapter.notifyDataSetChanged();
+                    deleteWorkout(item);
                     Toast.makeText(requireContext(), "Plan deleted", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private ArrayList<Workout> getListWorkout() {
-        ArrayList<Exercise> listExercise = getListExercise();
+    private void fetchListPlan() {
+        planService.getPlansByUserId(userId, new PlanService.ListPlanDataListener() {
+            @Override
+            public void onPlansLoaded(List<Plan> plans) {
+                listPlan.clear();
+                listPlan.addAll(plans);
+            }
 
-        ArrayList<Set> sets1 = new ArrayList<>();
-        sets1.add(new Set(1, 101, 1, 0, 15, 60));
-        sets1.add(new Set(2, 101, 1, 0, 12, 60));
-
-        ArrayList<Set> sets2 = new ArrayList<>();
-        sets2.add(new Set(3, 102, 2, 50, 10, 90));
-        sets2.add(new Set(4, 102, 2, 60, 8, 90));
-
-        ArrayList<Set> sets3 = new ArrayList<>();
-        sets3.add(new Set(5, 103, 3, 0, 10, 120));
-        sets3.add(new Set(6, 103, 3, 0, 8, 120));
-
-        ArrayList<Workout> workoutList = new ArrayList<>();
-        workoutList.add(new Workout(1, 101, 1, "Loss Weight", new Date(), listExercise.get(0), sets1));
-        workoutList.add(new Workout(1, 102, 2, "Loss Weight", new Date(), listExercise.get(1), sets2));
-        workoutList.add(new Workout(1, 103, 3, "Loss Weight", new Date(), listExercise.get(2), sets3));
-
-        return workoutList;
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private ArrayList<Exercise> getListExercise() {
-        ArrayList<Exercise> exerciseList = new ArrayList<>();
+    private void fetchListWorkout() {
+        workoutService.getByUserId(userId, new WorkoutService.ListWorkoutDataListener() {
+            @Override
+            public void onWorkoutsLoaded(List<Workout> workouts) {
+                listWorkout.clear();
+                Date today = new Date();
 
-        exerciseList.add(new Exercise(
-                1,
-                "Seated Dumbbell Shoulder Press",
-                "seated_dumbbell_shoulder_press",
-                "A strength exercise that targets the shoulders using dumbbells while seated.",
-                MuscleEnum.SHOULDERS,
-                MuscleEnum.TRICEPS,
-                null
-        ));
+                for (Workout workout : workouts) {
+                    if (isSameDay(workout.getDate(), today)) {
+                        listWorkout.add(workout);
+                    }
+                }
 
-        exerciseList.add(new Exercise(
-                2,
-                "Band Chest Fly",
-                "band_chest_fly",
-                "An isolation chest movement using resistance bands to target the pectoral muscles.",
-                MuscleEnum.CHEST,
-                MuscleEnum.SHOULDERS,
-                null
-        ));
+                workoutScheduleAdapter.notifyDataSetChanged();
+            }
 
-        exerciseList.add(new Exercise(
-                3,
-                "Yoga Warrior I",
-                "yoga_warrior_i",
-                "A foundational yoga pose that strengthens the legs, opens the hips, and improves balance.",
-                MuscleEnum.QUADS,
-                MuscleEnum.GLUTES,
-                MuscleEnum.CALVES
-        ));
-
-        return exerciseList;
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private ArrayList<Plan> getListPlan() {
-        ArrayList<Plan> result = new ArrayList<>();
+    private void updateWorkout(Workout workout) {
+        workoutService.updateWorkout(workout, new WorkoutService.WorkoutDataListener() {
+            @Override
+            public void onWorkoutLoaded(Workout workout) {
+                fetchListWorkout();
+            }
 
-        result.add(new Plan(1, 1, "Lost weight"));
-        result.add(new Plan(2, 1, "Build muscle"));
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
-        return result;
+    private void deleteWorkout(Workout workout) {
+        workoutService.deleteWorkout(workout, new WorkoutService.WorkoutDataListener() {
+            @Override
+            public void onWorkoutLoaded(Workout workout) {
+                fetchListWorkout();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void getUserId() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", 0);
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
+    }
+
+    private boolean isSameDay(Date date1, Date date2) {
+        // Implement a method to check if two Date objects represent the same day
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(date1);
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(date2);
+        return calendar1.get(Calendar.YEAR) == calendar2.get(Calendar.YEAR) &&
+                calendar1.get(Calendar.MONTH) == calendar2.get(Calendar.MONTH) &&
+                calendar1.get(Calendar.DAY_OF_MONTH) == calendar2.get(Calendar.DAY_OF_MONTH);
     }
 }

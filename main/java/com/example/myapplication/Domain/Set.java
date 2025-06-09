@@ -9,6 +9,7 @@ public class Set implements Serializable {
     private int weight;
     private int reps;
     private int restTime;
+    private boolean isFinish;
 
     // Constructor
     public Set(int id, int sessionId, int exerciseId, int weight, int reps, int restTime) {
@@ -18,6 +19,17 @@ public class Set implements Serializable {
         this.weight = weight;
         this.reps = reps;
         this.restTime = restTime;
+        this.isFinish = false;
+    }
+
+    public Set(int id, int sessionId, int exerciseId, int weight, int reps, int restTime, boolean isFinish) {
+        this.id = id;
+        this.sessionId = sessionId;
+        this.exerciseId = exerciseId;
+        this.weight = weight;
+        this.reps = reps;
+        this.restTime = restTime;
+        this.isFinish = isFinish;
     }
 
     // Getters and Setters
@@ -69,5 +81,7 @@ public class Set implements Serializable {
         this.restTime = restTime;
     }
 
+    public boolean isFinish() { return isFinish; }
+    public void setIsFinish(boolean isFinish) { this.isFinish = isFinish; }
 }
 

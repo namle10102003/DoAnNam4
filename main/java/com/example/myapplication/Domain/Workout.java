@@ -80,7 +80,13 @@ public class Workout implements Serializable {
     }
 
     public int getNumberOfSet() {
-        return  this.sets.size();
+        int count = 0;
+
+        for (Set set : sets) {
+            if (!set.isFinish()) count++;
+        }
+
+        return count;
     }
 
 }
