@@ -50,26 +50,6 @@
                     android:layout_marginTop="8dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-            <EditText
-                android:id="@+id/editTextText"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/edittext_bg"
-                android:drawableEnd="@drawable/search"
-                android:drawablePadding="8dp"
-                android:ems="10"
-                android:hint="Search Exercise..."
-                android:inputType="text"
-                android:padding="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
-                android:textSize="16sp"
-                android:textStyle="italic" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -89,7 +69,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/textView14"
+                    android:id="@+id/seeAllWorkout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="See All"
@@ -103,8 +83,7 @@
                 android:clipToPadding="false"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                app:layout_constraintBottom_toTopOf="@id/coordinatorLayout"
-                app:layout_constraintTop_toBottomOf="@id/textView12" />
+                app:layout_constraintBottom_toTopOf="@id/coordinatorLayout"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,7 +104,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/textView12"
+                    android:id="@+id/seeAllExercise"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="See All"
@@ -140,7 +119,7 @@
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 app:layout_constraintBottom_toTopOf="@id/coordinatorLayout"
-                app:layout_constraintTop_toBottomOf="@id/textView12" />
+                app:layout_constraintTop_toBottomOf="@id/seeAllExercise" />
 
         </LinearLayout>
     </ScrollView>

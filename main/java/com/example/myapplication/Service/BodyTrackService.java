@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.myapplication.ApiClient.ApiClient;
 import com.example.myapplication.ApiClient.BodyTrackApiService;
 import com.example.myapplication.Domain.BodyTrack;
+import com.example.myapplication.Utils.TrackValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,6 @@ public class BodyTrackService {
             public void onResponse(Call<List<BodyTrack>> call, Response<List<BodyTrack>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<BodyTrack> result = response.body();
-                    Log.d("BodyTrack", result.get(0).toString());
                     listener.onTracksLoaded(getSortedBodyTracks(result));
                 }
                 else {
@@ -48,6 +48,12 @@ public class BodyTrackService {
     }
 
     public void createTrack(BodyTrack track, TrackDataListener listener) {
+        String validateMessage = TrackValidation.Validate(track);
+        if (validateMessage != null) {
+            listener.onError(validateMessage);
+            return;
+        }
+
         Call<BodyTrack> call = apiService.create(track);
         call.enqueue(new Callback<BodyTrack>() {
             @Override
@@ -71,6 +77,12 @@ public class BodyTrackService {
     }
 
     public void updateTrack(BodyTrack track, TrackDataListener listener) {
+        String validateMessage = TrackValidation.Validate(track);
+        if (validateMessage != null) {
+            listener.onError(validateMessage);
+            return;
+        }
+
         Call<BodyTrack> call = apiService.update(track);
         call.enqueue(new Callback<BodyTrack>() {
             @Override

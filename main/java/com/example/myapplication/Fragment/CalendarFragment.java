@@ -2,6 +2,7 @@ package com.example.myapplication.Fragment;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Activity.WorkoutActivity;
 import com.example.myapplication.Adapter.WorkoutAdapter;
 import com.example.myapplication.Adapter.WorkoutScheduleAdapter;
 import com.example.myapplication.Domain.Exercise;
@@ -28,6 +30,8 @@ import com.example.myapplication.Domain.Set;
 import com.example.myapplication.Domain.Workout;
 import com.example.myapplication.Enum.MuscleEnum;
 import com.example.myapplication.R;
+import com.example.myapplication.Service.PlanService;
+import com.example.myapplication.Service.WorkoutService;
 import com.example.myapplication.databinding.FragmentCalendarBinding;
 import com.example.myapplication.databinding.FragmentTodayWorkoutBinding;
 
@@ -36,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class CalendarFragment extends Fragment {
@@ -44,11 +49,16 @@ public class CalendarFragment extends Fragment {
     private ArrayList<Plan> listPlans;
     private ArrayList<Workout> allWorkouts;  // This list contains all the workouts
     private ArrayList<Workout> selectedDayWorkouts;  // This list contains workouts of the selected day
+    private ArrayList<String> planNames;
     private Date selectedDate;
+    private int userId;
+    private PlanService planService;
+    private WorkoutService workoutService;
 
     // Initialize the adapter and RecyclerView
     private RecyclerView recyclerView;
     private WorkoutScheduleAdapter workoutAdapter;
+    private ArrayAdapter<String> spinnerAdapter;
 
     @Nullable
     @Override
@@ -61,11 +71,19 @@ public class CalendarFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        workoutService = new WorkoutService();
+        planService = new PlanService();
+
         // Initialize lists and RecyclerView
-        listPlans = getListPlan();
-        allWorkouts = getListWorkout();  // This method would fetch all workouts
+        planNames = new ArrayList<>();
+        listPlans = new ArrayList<>();
+        allWorkouts = new ArrayList<>();
         selectedDayWorkouts = new ArrayList<>();
         selectedDate = new Date();
+
+        getUserId();
+        //fetchListPlan();
+        //fetchListWorkout();
 
         workoutAdapter = new WorkoutScheduleAdapter(selectedDayWorkouts, new WorkoutScheduleAdapter.OnItemActionListener() {
             @Override
@@ -82,7 +100,7 @@ public class CalendarFragment extends Fragment {
         binding.calendarWorkoutRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.calendarWorkoutRecyclerView.setAdapter(workoutAdapter);
 
-        filterWorkoutsForSelectedDay();
+        //filterWorkoutsForSelectedDay();
 
         // Listen to calendar view date selection
         CalendarView calendarView = view.findViewById(R.id.calendarView);
@@ -93,13 +111,7 @@ public class CalendarFragment extends Fragment {
 
         //Plan Spinner
         Spinner planSpinner = view.findViewById(R.id.planSpinner);
-        ArrayList<String> planNames = new ArrayList<>();
-        planNames.add("All"); // Default option
-        for (Plan plan : listPlans) {
-            planNames.add(plan.getName());
-        }
-
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+        spinnerAdapter = new ArrayAdapter<>(
                 requireContext(),
                 R.layout.spinner_item_white,
                 planNames
@@ -128,6 +140,13 @@ public class CalendarFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchListPlan();
+        fetchListWorkout();
+    }
+
     private void filterWorkoutsForSelectedDay() {
         selectedDayWorkouts.clear();
         for (Workout workout : allWorkouts) {
@@ -153,6 +172,7 @@ public class CalendarFragment extends Fragment {
 
     private void filterWorkout() {
         int selectedPosition = binding.planSpinner.getSelectedItemPosition();
+        if (selectedPosition < 0) selectedPosition = 0;
         if (selectedPosition == 0) {
             filterWorkoutsForSelectedDay();
         } else {
@@ -183,9 +203,6 @@ public class CalendarFragment extends Fragment {
     }
 
     private void editWorkoutListener(Workout workout) {
-        ArrayList<Plan> listPlan = getListPlan();
-        ArrayList<Exercise> listExercise = getListExercise();
-
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_workout, null);
 
         Spinner spinnerPlan = dialogView.findViewById(R.id.spinnerPlan);
@@ -193,7 +210,7 @@ public class CalendarFragment extends Fragment {
         EditText editDate = dialogView.findViewById(R.id.editDate);
 
         // Set up Plan Spinner
-        ArrayAdapter<Plan> planAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, listPlan);
+        ArrayAdapter<Plan> planAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, listPlans);
         planAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerPlan.setAdapter(planAdapter);
 
@@ -202,8 +219,8 @@ public class CalendarFragment extends Fragment {
 
         // Pre-select existing values if editing
         if (workout != null) {
-            for (int i = 0; i < listPlan.size(); i++) {
-                if (listPlan.get(i).getId() == workout.getPlanId()) {
+            for (int i = 0; i < listPlans.size(); i++) {
+                if (listPlans.get(i).getId() == workout.getPlanId()) {
                     spinnerPlan.setSelection(i);
                     break;
                 }
@@ -244,9 +261,8 @@ public class CalendarFragment extends Fragment {
                         workout.setPlanId(selectedPlan.getId());
                         workout.setPlanName(selectedPlan.getName());
                         workout.setDate(selectedDate); // if needed
-                        // Notify adapter if you're updating a list
-                        filterWorkout();
-                        workoutAdapter.notifyDataSetChanged();
+
+                        updateWorkout(workout);
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -258,13 +274,84 @@ public class CalendarFragment extends Fragment {
                 .setTitle("Delete Workout")
                 .setMessage("Are you sure you want to delete this workout?")
                 .setPositiveButton("Delete", (dialog, which) -> {
-                    allWorkouts.remove(item);
-                    filterWorkout();
-                    workoutAdapter.notifyDataSetChanged();
+                    deleteWorkout(item);
                     Toast.makeText(requireContext(), "Plan deleted", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    public void getUserId() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", 0);
+        String currentUserId = prefs.getString("user_id", "-1");
+        userId = Integer.parseInt(currentUserId);
+    }
+
+    public void fetchListPlan() {
+        planService.getPlansByUserId(userId, new PlanService.ListPlanDataListener() {
+            @Override
+            public void onPlansLoaded(List<Plan> plans) {
+                listPlans.clear();
+                listPlans.addAll(plans);
+
+                planNames.clear();
+                planNames.add("All"); // Default option
+                for (Plan plan : listPlans) {
+                    planNames.add(plan.getName());
+                }
+                spinnerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void fetchListWorkout() {
+        workoutService.getByUserId(userId, new WorkoutService.ListWorkoutDataListener() {
+            @Override
+            public void onWorkoutsLoaded(List<Workout> workouts) {
+                allWorkouts.clear();
+                allWorkouts.addAll(workouts);
+                filterWorkout();
+                workoutAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void updateWorkout(Workout workout) {
+        workoutService.updateWorkout(workout, new WorkoutService.WorkoutDataListener() {
+            @Override
+            public void onWorkoutLoaded(Workout workout) {
+                fetchListWorkout();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void deleteWorkout(Workout workout) {
+        workoutService.deleteWorkout(workout, new WorkoutService.WorkoutDataListener() {
+            @Override
+            public void onWorkoutLoaded(Workout workout) {
+                fetchListWorkout();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private ArrayList<Workout> getListWorkout() {
