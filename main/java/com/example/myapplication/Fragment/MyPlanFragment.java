@@ -102,6 +102,11 @@ public class MyPlanFragment extends Fragment {
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String newName = nameEditText.getText().toString();
+
+                    if (newName.isEmpty()) {
+                        Toast.makeText(requireContext(), "Please enter the plan's name", Toast.LENGTH_SHORT).show();
+                    }
+
                     item.setName(newName);
                     // Optional: Update date to current date if needed
                     updatePlan(item);

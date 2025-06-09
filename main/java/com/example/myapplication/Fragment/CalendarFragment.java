@@ -2,6 +2,7 @@ package com.example.myapplication.Fragment;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Activity.AllExerciseActivity;
+import com.example.myapplication.Activity.MainActivity;
 import com.example.myapplication.Activity.WorkoutActivity;
 import com.example.myapplication.Adapter.WorkoutAdapter;
 import com.example.myapplication.Adapter.WorkoutScheduleAdapter;
@@ -138,6 +141,19 @@ public class CalendarFragment extends Fragment {
                 // Do nothing
             }
         });
+
+        binding.addWorkout.setOnClickListener(v -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+            String selectedDayStr = sdf.format(selectedDate);
+
+            SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", 0);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("selectedDay", selectedDayStr);
+            editor.apply();
+
+            Intent intent = new Intent(requireContext(), AllExerciseActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
@@ -214,7 +230,7 @@ public class CalendarFragment extends Fragment {
         planAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerPlan.setAdapter(planAdapter);
 
-        // Set up Exercise Text View
+        // Set up Exercise Text view
         textExercise.setText(workout.getExercise().getName());
 
         // Pre-select existing values if editing
@@ -226,7 +242,7 @@ public class CalendarFragment extends Fragment {
                 }
             }
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
             editDate.setText(sdf.format(workout.getDate()));
         }
 
@@ -238,7 +254,7 @@ public class CalendarFragment extends Fragment {
             }
             new DatePickerDialog(requireContext(), (view, year, month, dayOfMonth) -> {
                 calendar.set(year, month, dayOfMonth);
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
                 editDate.setText(sdf.format(calendar.getTime()));
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
@@ -251,7 +267,13 @@ public class CalendarFragment extends Fragment {
                     Plan selectedPlan = (Plan) spinnerPlan.getSelectedItem();
                     Date selectedDate = null;
                     try {
-                        selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(editDate.getText().toString());
+                        SimpleDateFormat displayFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+                        Date displayDate = displayFormat.parse(editDate.getText().toString());
+
+                        SimpleDateFormat storageFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                        String storageDateStr = storageFormat.format(displayDate);
+
+                        selectedDate = storageFormat.parse(storageDateStr);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -261,7 +283,8 @@ public class CalendarFragment extends Fragment {
                         workout.setPlanId(selectedPlan.getId());
                         workout.setPlanName(selectedPlan.getName());
                         workout.setDate(selectedDate); // if needed
-
+                        // Notify adapter if you're updating a list
+                        //Reload today workout list
                         updateWorkout(workout);
                     }
                 })

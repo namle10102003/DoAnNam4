@@ -58,6 +58,20 @@
         app:layout_constraintTop_toBottomOf="@id/planLabel"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/addWorkout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+ Add Workout"
+        android:textColor="@color/orange"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/planLabel"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/calendarWorkoutRecyclerView"
         android:layout_width="0dp"

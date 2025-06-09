@@ -109,6 +109,27 @@ public class WorkoutService {
         }
     }
 
+    public void createListWorkout(List<Workout> workouts, ListWorkoutDataListener listener) {
+        int[] count = {0};
+
+        for (Workout workout : workouts) {
+            createWorkout(workout, new WorkoutDataListener() {
+                @Override
+                public void onWorkoutLoaded(Workout workout) {
+                    count[0]++;
+                    if (count[0] == workouts.size()) {
+                        listener.onWorkoutsLoaded(new ArrayList<>());
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    listener.onError(message);
+                }
+            });
+        }
+    }
+
     public void updateWorkout(Workout workout, WorkoutDataListener listener) {
         sessionService.getByPlanId(workout.getPlanId(), new SessionService.ListSessionDataListener() {
             @Override

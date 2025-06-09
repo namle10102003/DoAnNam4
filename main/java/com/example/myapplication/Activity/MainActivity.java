@@ -70,11 +70,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.seeAllExercise.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("selectedDay", null);
+            editor.apply();
+
             Intent intent = new Intent(MainActivity.this, AllExerciseActivity.class);
             startActivity(intent);
         });
 
+        binding.buttonGoToSurvey.setOnClickListener(v -> {
+            Intent surveyIntent = new Intent(MainActivity.this, SurveyActivity.class);
+            startActivity(surveyIntent);
+        });
+
         getUserInfo();
+        binding.textView5.setText(username);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         fetchListExercise();
         fetchListWorkout();
     }
